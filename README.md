@@ -29,7 +29,10 @@ composer require mountsoftware/symfony-toon-serializer
 - 🔌 **Drop-in integration** with Symfony Serializer component
 - 📦 **Format identifier**: `toon`
 - ⚙️ **Configurable options**: delimiters, strict mode, indentation
-- 🧪 **Comprehensive test suite**: 56 tests covering all scenarios
+- ✅ **Option validation**: Early error detection with clear exceptions
+- 🎨 **Flexible API**: Namespaced or direct context options
+- 🔒 **Type-safe constants**: Use `ToonOptions` for autocomplete & validation
+- 🧪 **Comprehensive test suite**: 82 tests covering all scenarios
 - 📝 **Standalone service**: Use TOON without the full serializer
 - 🎯 **Thin wrapper**: Delegates all TOON logic to the proven `helgesverre/toon` library
 
@@ -87,16 +90,55 @@ $data = $toonService->decode($toon);
 
 ### Context Options
 
-You can pass options via the serializer context:
+Options can be passed in **two ways**:
+
+#### 1. Namespaced (Recommended)
+
+This approach namespaces options under `toon_options` to avoid conflicts with other encoders:
+
+```php
+use MountSoftware\SymfonyToonSerializer\ToonOptions;
+
+$toon = $serializer->serialize($data, 'toon', [
+    'toon_options' => [
+        ToonOptions::DELIMITER => ToonOptions::DELIMITER_TAB,
+        ToonOptions::STRICT => true,
+        ToonOptions::INDENT => 4,
+    ],
+]);
+```
+
+#### 2. Direct (Convenience)
+
+For simpler usage, you can pass options directly in the context:
 
 ```php
 $toon = $serializer->serialize($data, 'toon', [
-    'toon_options' => [
-        'delimiter' => "\t",    // Use tab delimiter
-        'strict' => true,       // Enable strict mode
-        'indent' => 4,          // 4 spaces for indentation
-    ],
+    'delimiter' => "\t",
+    'strict' => true,
+    'indent' => 4,
 ]);
+```
+
+**Note:** Namespaced options take precedence if both are provided.
+
+### Using Option Constants
+
+The `ToonOptions` class provides constants for type safety:
+
+```php
+use MountSoftware\SymfonyToonSerializer\ToonOptions;
+
+// Option keys
+ToonOptions::DELIMITER
+ToonOptions::INDENT
+ToonOptions::STRICT
+ToonOptions::LENGTH_MARKER
+
+// Delimiter values
+ToonOptions::DELIMITER_COMMA  // ','
+ToonOptions::DELIMITER_TAB    // "\t"
+ToonOptions::DELIMITER_PIPE   // '|'
 ```
 
 ### Available Options
@@ -140,6 +182,29 @@ $toon2 = $encoder->encode($data, 'toon', [
     'toon_options' => ['delimiter' => "\t"],
 ]);
 ```
+
+### Option Validation
+
+The library validates all options and throws `InvalidArgumentException` for invalid values:
+
+```php
+// Invalid delimiter - throws exception
+$serializer->serialize($data, 'toon', [
+    'delimiter' => ';',  // Only ',', "\t", '|' are valid
+]);
+
+// Invalid indent - throws exception
+$serializer->serialize($data, 'toon', [
+    'indent' => -1,  // Must be >= 0
+]);
+
+// Invalid strict mode - throws exception
+$encoder->decode($toon, 'toon', [
+    'strict' => 'true',  // Must be boolean, not string
+]);
+```
+
+This prevents silent failures and catches configuration errors early.
 
 ## Examples
 
@@ -302,7 +367,7 @@ Or with PHPUnit directly:
 vendor/bin/phpunit
 ```
 
-The test suite includes:
+The test suite includes 82 tests covering:
 - ✅ Simple object encoding/decoding
 - ✅ Nested object handling
 - ✅ Primitive array inline notation
@@ -313,6 +378,9 @@ The test suite includes:
 - ✅ Error handling and strict mode validation
 - ✅ Empty objects and arrays
 - ✅ Round-trip data integrity
+- ✅ Option validation (delimiters, indent, strict mode)
+- ✅ Context option extraction (namespaced & direct)
+- ✅ Invalid option error handling
 
 ## TOON Format
 

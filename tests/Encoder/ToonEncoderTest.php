@@ -586,4 +586,92 @@ TOON;
         // Should use comma, not pipe
         $this->assertStringContainsString(',', $toon);
     }
+
+    // ===== Direct Context Options Tests =====
+
+    public function testEncodeWithDirectContextOptions(): void
+    {
+        $data = [
+            'items' => [
+                ['a' => 1, 'b' => 2],
+                ['a' => 3, 'b' => 4],
+            ],
+        ];
+
+        // Use direct context options instead of namespaced
+        $toon = $this->serializer->serialize($data, 'toon', [
+            'delimiter' => '|',
+        ]);
+
+        $this->assertStringContainsString('|', $toon);
+    }
+
+    public function testDecodeWithDirectContextOptions(): void
+    {
+        $toon = "items[2|]{a|b}:\n  1|2\n  3|4";
+
+        // Use direct context options
+        $data = $this->encoder->decode($toon, 'toon', [
+            'strict' => false,
+        ]);
+
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('items', $data);
+    }
+
+    public function testNamespacedOptionsOverrideDirectOptions(): void
+    {
+        $data = [
+            'items' => [
+                ['a' => 1, 'b' => 2],
+            ],
+        ];
+
+        // Namespaced should win
+        $toon = $this->serializer->serialize($data, 'toon', [
+            'delimiter' => ',',  // Direct option
+            'toon_options' => [
+                'delimiter' => '|',  // Namespaced option (should win)
+            ],
+        ]);
+
+        $this->assertStringContainsString('|', $toon);
+        $this->assertStringNotContainsString('1,2', $toon);
+    }
+
+    public function testInvalidDelimiterThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid delimiter');
+
+        $data = ['test' => 'value'];
+
+        $this->serializer->serialize($data, 'toon', [
+            'delimiter' => ';',  // Invalid delimiter
+        ]);
+    }
+
+    public function testInvalidIndentThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Indent must be a non-negative integer');
+
+        $data = ['test' => 'value'];
+
+        $this->serializer->serialize($data, 'toon', [
+            'indent' => -1,  // Invalid indent
+        ]);
+    }
+
+    public function testInvalidStrictModeThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Strict mode must be a boolean');
+
+        $toon = "test: value";
+
+        $this->encoder->decode($toon, 'toon', [
+            'strict' => 'true',  // Should be boolean, not string
+        ]);
+    }
 }

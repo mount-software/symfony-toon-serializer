@@ -7,6 +7,7 @@ namespace MountSoftware\SymfonyToonSerializer\Encoder;
 use HelgeSverre\Toon\DecodeOptions;
 use HelgeSverre\Toon\EncodeOptions;
 use HelgeSverre\Toon\Toon;
+use MountSoftware\SymfonyToonSerializer\ToonOptions;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
@@ -16,7 +17,55 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
  * This encoder integrates the TOON format with Symfony's serializer component,
  * delegating the actual encoding/decoding to the helgesverre/toon library.
  *
+ * ## Context Options
+ *
+ * Options can be passed in two ways:
+ *
+ * 1. Namespaced (recommended):
+ *    ```php
+ *    $serializer->serialize($data, 'toon', [
+ *        'toon_options' => [
+ *            'delimiter' => "\t",
+ *            'strict' => true,
+ *        ],
+ *    ]);
+ *    ```
+ *
+ * 2. Direct (convenience):
+ *    ```php
+ *    $serializer->serialize($data, 'toon', [
+ *        'delimiter' => "\t",
+ *        'strict' => true,
+ *    ]);
+ *    ```
+ *
+ * Namespaced options take precedence if both are provided.
+ *
+ * ### Encoding Options
+ *
+ * - **delimiter** (string): Field delimiter for tabular data
+ *   - `','` (default) - Comma delimiter
+ *   - `"\t"` - Tab delimiter
+ *   - `'|'` - Pipe delimiter
+ *
+ * - **indent** (int): Number of spaces for indentation (default: 2)
+ *   - Must be >= 0
+ *
+ * - **lengthMarker** (string|false): Array length marker prefix (default: false)
+ *   - `'#'` - Enable length markers
+ *   - `false` - Disable length markers
+ *
+ * ### Decoding Options
+ *
+ * - **strict** (bool): Enable strict mode validation (default: true)
+ *   - `true` - Strict validation (throws on errors)
+ *   - `false` - Lenient mode (best-effort parsing)
+ *
+ * - **indent** (int): Expected indentation level (default: 2)
+ *   - Must be >= 0
+ *
  * @see https://github.com/HelgeSverre/toon
+ * @see ToonOptions For option constants and validation
  */
 final class ToonEncoder implements EncoderInterface, DecoderInterface
 {
@@ -32,10 +81,17 @@ final class ToonEncoder implements EncoderInterface, DecoderInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \InvalidArgumentException if options are invalid
      */
     public function encode(mixed $data, string $format, array $context = []): string
     {
-        $options = array_replace($this->defaultOptions, $context['toon_options'] ?? []);
+        $options = array_replace(
+            $this->defaultOptions,
+            ToonOptions::extractFromContext($context)
+        );
+
+        ToonOptions::validateEncodeOptions($options);
         $encodeOptions = $this->createEncodeOptions($options);
 
         return Toon::encode($data, $encodeOptions);
@@ -51,10 +107,17 @@ final class ToonEncoder implements EncoderInterface, DecoderInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \InvalidArgumentException if options are invalid
      */
     public function decode(string $data, string $format, array $context = []): mixed
     {
-        $options = array_replace($this->defaultOptions, $context['toon_options'] ?? []);
+        $options = array_replace(
+            $this->defaultOptions,
+            ToonOptions::extractFromContext($context)
+        );
+
+        ToonOptions::validateDecodeOptions($options);
         $decodeOptions = $this->createDecodeOptions($options);
 
         return Toon::decode($data, $decodeOptions);
@@ -80,9 +143,9 @@ final class ToonEncoder implements EncoderInterface, DecoderInterface
         }
 
         return new EncodeOptions(
-            indent: $options['indent'] ?? 2,
-            delimiter: $options['delimiter'] ?? ',',
-            lengthMarker: $options['lengthMarker'] ?? false,
+            indent: $options[ToonOptions::INDENT] ?? 2,
+            delimiter: $options[ToonOptions::DELIMITER] ?? ',',
+            lengthMarker: $options[ToonOptions::LENGTH_MARKER] ?? false,
         );
     }
 
@@ -98,8 +161,9 @@ final class ToonEncoder implements EncoderInterface, DecoderInterface
         }
 
         return new DecodeOptions(
-            indent: $options['indent'] ?? 2,
-            strict: $options['strict'] ?? true,
+            indent: $options[ToonOptions::INDENT] ?? 2,
+            strict: $options[ToonOptions::STRICT] ?? true,
         );
     }
 }
+
