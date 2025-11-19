@@ -587,57 +587,7 @@ TOON;
         $this->assertStringContainsString(',', $toon);
     }
 
-    // ===== Direct Context Options Tests =====
-
-    public function testEncodeWithDirectContextOptions(): void
-    {
-        $data = [
-            'items' => [
-                ['a' => 1, 'b' => 2],
-                ['a' => 3, 'b' => 4],
-            ],
-        ];
-
-        // Use direct context options instead of namespaced
-        $toon = $this->serializer->serialize($data, 'toon', [
-            'delimiter' => '|',
-        ]);
-
-        $this->assertStringContainsString('|', $toon);
-    }
-
-    public function testDecodeWithDirectContextOptions(): void
-    {
-        $toon = "items[2|]{a|b}:\n  1|2\n  3|4";
-
-        // Use direct context options
-        $data = $this->encoder->decode($toon, 'toon', [
-            'strict' => false,
-        ]);
-
-        $this->assertIsArray($data);
-        $this->assertArrayHasKey('items', $data);
-    }
-
-    public function testNamespacedOptionsOverrideDirectOptions(): void
-    {
-        $data = [
-            'items' => [
-                ['a' => 1, 'b' => 2],
-            ],
-        ];
-
-        // Namespaced should win
-        $toon = $this->serializer->serialize($data, 'toon', [
-            'delimiter' => ',',  // Direct option
-            'toon_options' => [
-                'delimiter' => '|',  // Namespaced option (should win)
-            ],
-        ]);
-
-        $this->assertStringContainsString('|', $toon);
-        $this->assertStringNotContainsString('1,2', $toon);
-    }
+    // ===== Option Validation Tests =====
 
     public function testInvalidDelimiterThrowsException(): void
     {
@@ -647,7 +597,9 @@ TOON;
         $data = ['test' => 'value'];
 
         $this->serializer->serialize($data, 'toon', [
-            'delimiter' => ';',  // Invalid delimiter
+            'toon_options' => [
+                'delimiter' => ';',  // Invalid delimiter
+            ],
         ]);
     }
 
@@ -659,7 +611,9 @@ TOON;
         $data = ['test' => 'value'];
 
         $this->serializer->serialize($data, 'toon', [
-            'indent' => -1,  // Invalid indent
+            'toon_options' => [
+                'indent' => -1,  // Invalid indent
+            ],
         ]);
     }
 
@@ -671,7 +625,9 @@ TOON;
         $toon = "test: value";
 
         $this->encoder->decode($toon, 'toon', [
-            'strict' => 'true',  // Should be boolean, not string
+            'toon_options' => [
+                'strict' => 'true',  // Should be boolean, not string
+            ],
         ]);
     }
 }

@@ -19,27 +19,19 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
  *
  * ## Context Options
  *
- * Options can be passed in two ways:
+ * Following Symfony conventions, options must be namespaced under 'toon_options':
  *
- * 1. Namespaced (recommended):
- *    ```php
- *    $serializer->serialize($data, 'toon', [
- *        'toon_options' => [
- *            'delimiter' => "\t",
- *            'strict' => true,
- *        ],
- *    ]);
- *    ```
+ * ```php
+ * use MountSoftware\SymfonyToonSerializer\ToonOptions;
  *
- * 2. Direct (convenience):
- *    ```php
- *    $serializer->serialize($data, 'toon', [
- *        'delimiter' => "\t",
- *        'strict' => true,
- *    ]);
- *    ```
- *
- * Namespaced options take precedence if both are provided.
+ * $serializer->serialize($data, 'toon', [
+ *     'toon_options' => [
+ *         ToonOptions::DELIMITER => ToonOptions::DELIMITER_TAB,
+ *         ToonOptions::STRICT => true,
+ *         ToonOptions::INDENT => 4,
+ *     ],
+ * ]);
+ * ```
  *
  * ### Encoding Options
  *

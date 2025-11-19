@@ -90,11 +90,7 @@ $data = $toonService->decode($toon);
 
 ### Context Options
 
-Options can be passed in **two ways**:
-
-#### 1. Namespaced (Recommended)
-
-This approach namespaces options under `toon_options` to avoid conflicts with other encoders:
+Following Symfony conventions, options must be namespaced under `toon_options`:
 
 ```php
 use MountSoftware\SymfonyToonSerializer\ToonOptions;
@@ -108,19 +104,7 @@ $toon = $serializer->serialize($data, 'toon', [
 ]);
 ```
 
-#### 2. Direct (Convenience)
-
-For simpler usage, you can pass options directly in the context:
-
-```php
-$toon = $serializer->serialize($data, 'toon', [
-    'delimiter' => "\t",
-    'strict' => true,
-    'indent' => 4,
-]);
-```
-
-**Note:** Namespaced options take precedence if both are provided.
+This prevents conflicts with other encoders and follows Symfony best practices.
 
 ### Using Option Constants
 

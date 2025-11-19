@@ -150,66 +150,6 @@ class ToonOptionsTest extends TestCase
         $this->assertFalse($extracted[ToonOptions::STRICT]);
     }
 
-    public function testExtractFromContextWithDirectOptions(): void
-    {
-        $context = [
-            ToonOptions::DELIMITER => ToonOptions::DELIMITER_PIPE,
-            ToonOptions::STRICT => true,
-        ];
-
-        $extracted = ToonOptions::extractFromContext($context);
-
-        $this->assertEquals(ToonOptions::DELIMITER_PIPE, $extracted[ToonOptions::DELIMITER]);
-        $this->assertTrue($extracted[ToonOptions::STRICT]);
-    }
-
-    public function testExtractFromContextNamespacedTakesPrecedence(): void
-    {
-        $context = [
-            ToonOptions::DELIMITER => ToonOptions::DELIMITER_COMMA,
-            'toon_options' => [
-                ToonOptions::DELIMITER => ToonOptions::DELIMITER_TAB,
-            ],
-        ];
-
-        $extracted = ToonOptions::extractFromContext($context);
-
-        // Namespaced option should win
-        $this->assertEquals(ToonOptions::DELIMITER_TAB, $extracted[ToonOptions::DELIMITER]);
-    }
-
-    public function testExtractFromContextMergesBothSources(): void
-    {
-        $context = [
-            ToonOptions::DELIMITER => ToonOptions::DELIMITER_COMMA,
-            ToonOptions::INDENT => 4,
-            'toon_options' => [
-                ToonOptions::STRICT => false,
-            ],
-        ];
-
-        $extracted = ToonOptions::extractFromContext($context);
-
-        $this->assertEquals(ToonOptions::DELIMITER_COMMA, $extracted[ToonOptions::DELIMITER]);
-        $this->assertEquals(4, $extracted[ToonOptions::INDENT]);
-        $this->assertFalse($extracted[ToonOptions::STRICT]);
-    }
-
-    public function testExtractFromContextIgnoresUnknownKeys(): void
-    {
-        $context = [
-            'unknown_option' => 'value',
-            'other_encoder_option' => 123,
-            ToonOptions::DELIMITER => ToonOptions::DELIMITER_TAB,
-        ];
-
-        $extracted = ToonOptions::extractFromContext($context);
-
-        $this->assertArrayHasKey(ToonOptions::DELIMITER, $extracted);
-        $this->assertArrayNotHasKey('unknown_option', $extracted);
-        $this->assertArrayNotHasKey('other_encoder_option', $extracted);
-    }
-
     public function testExtractFromContextReturnsEmptyArrayForNoOptions(): void
     {
         $context = [
@@ -218,6 +158,20 @@ class ToonOptionsTest extends TestCase
 
         $extracted = ToonOptions::extractFromContext($context);
 
+        $this->assertEquals([], $extracted);
+    }
+
+    public function testExtractFromContextIgnoresNonNamespacedOptions(): void
+    {
+        $context = [
+            'delimiter' => '|',  // Not namespaced, should be ignored
+            'strict' => false,   // Not namespaced, should be ignored
+            'other_option' => 123,
+        ];
+
+        $extracted = ToonOptions::extractFromContext($context);
+
+        // Should return empty array since no 'toon_options' key
         $this->assertEquals([], $extracted);
     }
 

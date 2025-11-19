@@ -115,30 +115,14 @@ final class ToonOptions
     /**
      * Extract TOON options from Symfony serializer context.
      *
-     * Supports both namespaced options (toon_options) and direct options.
-     * Namespaced options take precedence.
+     * Following Symfony conventions, options must be namespaced under 'toon_options'.
      *
      * @param array<string, mixed> $context Serializer context
      * @return array<string, mixed> Extracted TOON options
      */
     public static function extractFromContext(array $context): array
     {
-        $options = [];
-
-        // First, check for direct context options
-        $directKeys = [self::DELIMITER, self::INDENT, self::LENGTH_MARKER, self::STRICT];
-        foreach ($directKeys as $key) {
-            if (isset($context[$key])) {
-                $options[$key] = $context[$key];
-            }
-        }
-
-        // Namespaced options override direct options
-        if (isset($context['toon_options']) && is_array($context['toon_options'])) {
-            $options = array_replace($options, $context['toon_options']);
-        }
-
-        return $options;
+        return $context['toon_options'] ?? [];
     }
 
     private function __construct()
