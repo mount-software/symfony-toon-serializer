@@ -30,9 +30,9 @@ composer require mountsoftware/symfony-toon-serializer
 - 📦 **Format identifier**: `toon`
 - ⚙️ **Configurable options**: delimiters, strict mode, indentation
 - ✅ **Option validation**: Early error detection with clear exceptions
-- 🎨 **Flexible API**: Namespaced or direct context options
+- 🎨 **Symfony conventions**: Namespaced context options following best practices
 - 🔒 **Type-safe constants**: Use `ToonOptions` for autocomplete & validation
-- 🧪 **Comprehensive test suite**: 82 tests covering all scenarios
+- 🧪 **Comprehensive test suite**: 76 tests covering all scenarios
 - 📝 **Standalone service**: Use TOON without the full serializer
 - 🎯 **Thin wrapper**: Delegates all TOON logic to the proven `helgesverre/toon` library
 
@@ -174,17 +174,23 @@ The library validates all options and throws `InvalidArgumentException` for inva
 ```php
 // Invalid delimiter - throws exception
 $serializer->serialize($data, 'toon', [
-    'delimiter' => ';',  // Only ',', "\t", '|' are valid
+    'toon_options' => [
+        'delimiter' => ';',  // Only ',', "\t", '|' are valid
+    ],
 ]);
 
 // Invalid indent - throws exception
 $serializer->serialize($data, 'toon', [
-    'indent' => -1,  // Must be >= 0
+    'toon_options' => [
+        'indent' => -1,  // Must be >= 0
+    ],
 ]);
 
 // Invalid strict mode - throws exception
 $encoder->decode($toon, 'toon', [
-    'strict' => 'true',  // Must be boolean, not string
+    'toon_options' => [
+        'strict' => 'true',  // Must be boolean, not string
+    ],
 ]);
 ```
 
@@ -351,7 +357,7 @@ Or with PHPUnit directly:
 vendor/bin/phpunit
 ```
 
-The test suite includes 82 tests covering:
+The test suite includes 76 tests covering:
 - ✅ Simple object encoding/decoding
 - ✅ Nested object handling
 - ✅ Primitive array inline notation
@@ -363,7 +369,7 @@ The test suite includes 82 tests covering:
 - ✅ Empty objects and arrays
 - ✅ Round-trip data integrity
 - ✅ Option validation (delimiters, indent, strict mode)
-- ✅ Context option extraction (namespaced & direct)
+- ✅ Context option extraction (namespaced)
 - ✅ Invalid option error handling
 
 ## TOON Format
