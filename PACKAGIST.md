@@ -88,9 +88,11 @@ Follow [Semantic Versioning](https://semver.org/):
 
 5. **Verify on Packagist**: Check [your package page](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
 
-### GitLab CI/CD Release Job
+### CI/CD Release Automation
 
-The `.gitlab-ci.yml` includes a release job that runs on tags:
+The package includes automated release jobs for both GitLab CI and GitHub Actions:
+
+#### GitLab CI (.gitlab-ci.yml)
 
 ```yaml
 release:packagist:
@@ -101,7 +103,17 @@ release:packagist:
     - echo "Release $CI_COMMIT_TAG created"
 ```
 
-This job confirms the release in CI/CD, but Packagist updates automatically via webhook.
+#### GitHub Actions (.github/workflows/ci.yml)
+
+```yaml
+release:
+  name: Create Release
+  if: startsWith(github.ref, 'refs/tags/')
+  steps:
+    - uses: actions/create-release@v1
+```
+
+These jobs confirm the release in CI/CD and create GitHub releases. Packagist updates automatically via webhook regardless of which CI system you use.
 
 ## Version Constraints
 
@@ -123,9 +135,11 @@ composer require mountsoftware/symfony-toon-serializer:dev-main
 Add badges to your README.md:
 
 ```markdown
+[![CI/CD](https://github.com/mountsoftware/symfony-toon-serializer/actions/workflows/ci.yml/badge.svg)](https://github.com/mountsoftware/symfony-toon-serializer/actions)
 [![Latest Stable Version](https://poser.pugx.org/mountsoftware/symfony-toon-serializer/v/stable)](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
 [![Total Downloads](https://poser.pugx.org/mountsoftware/symfony-toon-serializer/downloads)](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
 [![License](https://poser.pugx.org/mountsoftware/symfony-toon-serializer/license)](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue)]()
 ```
 
 ## Maintenance

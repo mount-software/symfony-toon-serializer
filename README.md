@@ -1,9 +1,9 @@
 # Symfony TOON Serializer
 
+[![CI/CD](https://github.com/mountsoftware/symfony-toon-serializer/actions/workflows/ci.yml/badge.svg)](https://github.com/mountsoftware/symfony-toon-serializer/actions)
 [![Latest Stable Version](https://poser.pugx.org/mountsoftware/symfony-toon-serializer/v/stable)](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
 [![Total Downloads](https://poser.pugx.org/mountsoftware/symfony-toon-serializer/downloads)](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
 [![License](https://poser.pugx.org/mountsoftware/symfony-toon-serializer/license)](https://packagist.org/packages/mountsoftware/symfony-toon-serializer)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)]()
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue)]()
 
 A Symfony Serializer integration for **TOON** (Token-Oriented Object Notation) format, built on top of the [`helgesverre/toon`](https://github.com/HelgeSverre/toon) library.
